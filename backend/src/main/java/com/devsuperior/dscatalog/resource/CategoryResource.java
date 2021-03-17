@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.services.CategoryService;
 
@@ -28,26 +29,26 @@ public class CategoryResource {
 	private CategoryService service;
 	
 	@GetMapping
-	public ResponseEntity<List<Category>> findAll() {
-		List<Category> categorias = service.findAll();
+	public ResponseEntity<List<CategoryDTO>> findAll() {
+		List<CategoryDTO> categorias = service.findAll();
 		return !categorias.isEmpty() ? ResponseEntity.ok(categorias) : ResponseEntity.notFound().build();
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<Category> findById(@PathParam("id") Long id) {
-		Optional<Category> categoria = service.findById(id);
+	public ResponseEntity<CategoryDTO> findById(@PathParam("id") Long id) {
+		Optional<CategoryDTO> categoria = service.findById(id);
 		return categoria.isPresent() ? ResponseEntity.ok(categoria.get()) : ResponseEntity.notFound().build();
 	}
 	
 	@PostMapping
-	public ResponseEntity<Category> criarCategoria(@RequestBody Category categoria) {
-		Category temp =  service.save(categoria);
+	public ResponseEntity<CategoryDTO> criarCategoria(@RequestBody Category categoria) {
+		CategoryDTO temp =  service.save(categoria);
 		return temp != null ? ResponseEntity.ok(temp) : ResponseEntity.notFound().build();
 	}
 	
 	@PutMapping
-	public ResponseEntity<Category> atualizarCategoria(@RequestBody Category categoria) {
-		Category temp =  service.save(categoria);
+	public ResponseEntity<CategoryDTO> atualizarCategoria(@RequestBody Category categoria) {
+		CategoryDTO temp =  service.save(categoria);
 		return temp != null ? ResponseEntity.ok(temp) : ResponseEntity.notFound().build();
 	}
 	
