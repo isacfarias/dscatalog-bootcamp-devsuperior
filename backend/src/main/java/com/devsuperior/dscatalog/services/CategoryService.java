@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,49 +13,51 @@ import org.springframework.transaction.annotation.Transactional;
 import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.repositoy.CategoryRepository;
-import com.devsuperior.dscatalog.services.exception.EntityNotFoundException;
+import com.devsuperior.dscatalog.services.exception.ResourceNotFoundException;
 
 @Service
 public class CategoryService {
-	
+
 	@Autowired
 	private CategoryRepository repository;
 
 	@Transactional(readOnly = true)
 	public List<CategoryDTO> findAll() {
 		List<CategoryDTO> categorias = repository.findAll()
-				                                 .stream()
-				                                 .map(category -> new CategoryDTO(category))
-				                                 .collect(Collectors.toList());
+				.stream()
+				.map(category -> new CategoryDTO(category))
+				.collect(Collectors.toList());
 		return categorias;
 	}
 
 	@Transactional(readOnly = true)
 	public Optional<CategoryDTO> findById(Long id) {
-		return Optional.of(new CategoryDTO(repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Recurso não encontrado") )));
+		return Optional.of(new CategoryDTO(repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado") )));
 	}
-	
+
 	@Transactional
 	public CategoryDTO save(CategoryDTO categoria) {
 		Category category = new Category();
 		category.setName(categoria.getName());
 		return new CategoryDTO(repository.save(category));
 	}
-	
+
 	@Transactional
-	public CategoryDTO update(CategoryDTO categoria) {
-		Category category = new Category();
-		category.setId(categoria.getId());
-		category.setName(categoria.getName());
-		
-		return new CategoryDTO(repository.save(category));
+	public CategoryDTO update(Long id, CategoryDTO categoria) {
+		try {
+			Category category = repository.getOne(id);
+			category.setName(categoria.getName());
+			return new CategoryDTO(repository.save(category));
+		} catch (EntityNotFoundException e) {
+			throw new ResourceNotFoundException("Id não encontrado: "+id);
+		}
 	}
-	
+
 	@Transactional
 	public void delete(Long id) {
 		repository.deleteById(id);
 	}
-	
-	
-	
+
+
+
 }

@@ -52,9 +52,9 @@ public class CategoryResource {
 		return categoria != null ? ResponseEntity.created(uri).body(categoria) : ResponseEntity.notFound().build();
 	}
 	
-	@PutMapping
-	public ResponseEntity<CategoryDTO> atualizarCategoria(@RequestBody CategoryDTO categoria) {
-		CategoryDTO temp =  service.update(categoria);
+	@PutMapping("/{id}")
+	public ResponseEntity<CategoryDTO> atualizarCategoria(@PathVariable Long id, @RequestBody CategoryDTO categoria) {
+		CategoryDTO temp =  service.update(id, categoria);
 		return temp != null ? ResponseEntity.ok(temp) : ResponseEntity.notFound().build();
 	}
 	
