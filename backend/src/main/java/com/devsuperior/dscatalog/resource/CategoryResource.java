@@ -58,9 +58,9 @@ public class CategoryResource {
 		return temp != null ? ResponseEntity.ok(temp) : ResponseEntity.notFound().build();
 	}
 	
-	@DeleteMapping
+	@DeleteMapping("/{id}")
 	@ResponseStatus(value = HttpStatus.NO_CONTENT)
-	public void delete(@PathParam("id") Long id) {
+	public void delete(@PathVariable Long id) {
 		service.delete(id);
 	}
 }

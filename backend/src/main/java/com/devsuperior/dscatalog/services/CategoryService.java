@@ -7,12 +7,15 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.repositoy.CategoryRepository;
+import com.devsuperior.dscatalog.services.exception.DataBaseException;
 import com.devsuperior.dscatalog.services.exception.ResourceNotFoundException;
 
 @Service
@@ -23,16 +26,16 @@ public class CategoryService {
 
 	@Transactional(readOnly = true)
 	public List<CategoryDTO> findAll() {
-		List<CategoryDTO> categorias = repository.findAll()
+		return repository.findAll()
 				.stream()
-				.map(category -> new CategoryDTO(category))
+				.map(CategoryDTO::new)
 				.collect(Collectors.toList());
-		return categorias;
 	}
 
 	@Transactional(readOnly = true)
 	public Optional<CategoryDTO> findById(Long id) {
-		return Optional.of(new CategoryDTO(repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado") )));
+		return Optional.of(new CategoryDTO(repository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado") )));
 	}
 
 	@Transactional
@@ -53,11 +56,14 @@ public class CategoryService {
 		}
 	}
 
-	@Transactional
 	public void delete(Long id) {
-		repository.deleteById(id);
+		try {
+			repository.deleteById(id);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataBaseException("Integridade violada: "+id);
+		} catch (EmptyResultDataAccessException e) {
+			throw new ResourceNotFoundException("Id não encontrado: "+id);
+		}
 	}
-
-
 
 }
