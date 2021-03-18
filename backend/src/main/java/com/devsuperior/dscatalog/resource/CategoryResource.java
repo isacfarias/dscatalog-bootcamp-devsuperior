@@ -1,5 +1,6 @@
 package com.devsuperior.dscatalog.resource;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.devsuperior.dscatalog.dto.CategoryDTO;
 import com.devsuperior.dscatalog.entities.Category;
@@ -42,14 +44,17 @@ public class CategoryResource {
 	}
 	
 	@PostMapping
-	public ResponseEntity<CategoryDTO> criarCategoria(@RequestBody Category categoria) {
-		CategoryDTO temp =  service.save(categoria);
-		return temp != null ? ResponseEntity.ok(temp) : ResponseEntity.notFound().build();
+	public ResponseEntity<CategoryDTO> criarCategoria(@RequestBody CategoryDTO categoria) {
+		categoria =  service.save(categoria);
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+				.buildAndExpand(categoria.getId()).toUri();
+		
+		return categoria != null ? ResponseEntity.created(uri).body(categoria) : ResponseEntity.notFound().build();
 	}
 	
 	@PutMapping
-	public ResponseEntity<CategoryDTO> atualizarCategoria(@RequestBody Category categoria) {
-		CategoryDTO temp =  service.save(categoria);
+	public ResponseEntity<CategoryDTO> atualizarCategoria(@RequestBody CategoryDTO categoria) {
+		CategoryDTO temp =  service.update(categoria);
 		return temp != null ? ResponseEntity.ok(temp) : ResponseEntity.notFound().build();
 	}
 	

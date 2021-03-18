@@ -33,10 +33,23 @@ public class CategoryService {
 		return Optional.of(new CategoryDTO(repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Recurso não encontrado") )));
 	}
 	
-	public CategoryDTO save(Category category) {
+	@Transactional
+	public CategoryDTO save(CategoryDTO categoria) {
+		Category category = new Category();
+		category.setName(categoria.getName());
 		return new CategoryDTO(repository.save(category));
 	}
 	
+	@Transactional
+	public CategoryDTO update(CategoryDTO categoria) {
+		Category category = new Category();
+		category.setId(categoria.getId());
+		category.setName(categoria.getName());
+		
+		return new CategoryDTO(repository.save(category));
+	}
+	
+	@Transactional
 	public void delete(Long id) {
 		repository.deleteById(id);
 	}
