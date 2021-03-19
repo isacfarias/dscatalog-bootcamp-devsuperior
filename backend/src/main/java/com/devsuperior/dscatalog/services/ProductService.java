@@ -1,7 +1,5 @@
 package com.devsuperior.dscatalog.services;
 
-import java.util.Optional;
-
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devsuperior.dscatalog.dto.ProductDTO;
+import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
+import com.devsuperior.dscatalog.repositoy.CategoryRepository;
 import com.devsuperior.dscatalog.repositoy.ProductRepository;
 import com.devsuperior.dscatalog.services.exception.DataBaseException;
 import com.devsuperior.dscatalog.services.exception.ResourceNotFoundException;
@@ -23,6 +23,9 @@ public class ProductService {
 
 	@Autowired
 	private ProductRepository productRepository;
+	
+	@Autowired
+	private CategoryRepository categoryRepository;
 	
 	
 	@Transactional(readOnly = true)
@@ -39,15 +42,16 @@ public class ProductService {
 
 	@Transactional
 	public ProductDTO save(ProductDTO dto) {
-		Product product = new Product(dto);
+		Product product = new Product();
+		copyDtoToEntity(dto, product);
 		return new ProductDTO(productRepository.save(product));
 	}
 
 	@Transactional
-	public ProductDTO update(Long id, ProductDTO categoria) {
+	public ProductDTO update(Long id, ProductDTO dto) {
 		try {
 			Product product = productRepository.getOne(id);
-			product.setName(categoria.getName());
+			copyDtoToEntity(dto, product);
 			return new ProductDTO(productRepository.save(product));
 		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoundException("Id não encontrado: "+id);
@@ -62,5 +66,20 @@ public class ProductService {
 		} catch (EmptyResultDataAccessException e) {
 			throw new ResourceNotFoundException("Id não encontrado: "+id);
 		}
+	}
+	
+	private void copyDtoToEntity(ProductDTO dto, Product product) {
+		product.setName(dto.getName());
+		product.setDescription(dto.getDescription());
+		product.setPrice(dto.getPrice());
+		product.setImgUrl(dto.getImgUrl());
+		product.setDate(dto.getDate());
+		product.getCategories().clear();
+		
+		dto.getCategories().forEach(categoryDto -> {
+			Category category = categoryRepository.getOne(categoryDto.getId());
+			product.getCategories().add(category);
+		});
+		
 	}
 }
