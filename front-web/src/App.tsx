@@ -1,11 +1,11 @@
 import React  from 'react';
+import './core/assets/styles/custom.scss';
+import './app.scss';
 
 const App = () => {
   return (
-    <div className="container mt-5">
-   
-    </div>
-  );
+     <h1>App</h1>
+   );
 }
 
 export default App;
