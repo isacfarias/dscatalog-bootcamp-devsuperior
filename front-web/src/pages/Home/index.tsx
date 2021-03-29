@@ -6,7 +6,7 @@ import './styles.scss';
 
 const Home = () => (
     <div className="home-container" >
-        <div className="row home-content">
+        <div className="row home-content card-base border-radios-20">
             
             <div className="col-6 home-text">
                 
