@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
+import ProductPrice from '../ProductPrice';
 import { ReactComponent as ArrowIcon } from '../../../../core/assets/images/arrow.svg';
 import { ReactComponent as ProductImage } from '../../../../core/assets/images/product.svg';
 import './styles.scss';
@@ -17,7 +18,7 @@ const ProductDetails = () => {
     return (
         <div className="product-details-container">
             <div className="card-base border-radios-20 product-datails">
-                <Link to="/produts" className="product-datails-goback">
+                <Link to="/products" className="product-datails-goback">
                     <ArrowIcon className="icon-goback" />
                     <h1 className="text-goback">Voltar</h1>
                 </Link>
@@ -30,8 +31,9 @@ const ProductDetails = () => {
                         <h1 className="product-datails-name">
                             Computador Desktop - Intel Core i7
                         </h1>
-                        <span className="product-currency">R$</span>
-                        <h3 className="product-price">2779,00</h3>
+
+                        <ProductPrice price="3.779,00" />
+                        
                     </div>
 
                     <div className="col-6 product-details-card border-radios-20">
