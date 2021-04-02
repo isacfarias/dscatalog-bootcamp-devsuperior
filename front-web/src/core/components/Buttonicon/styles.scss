@@ -4,7 +4,6 @@
     background: #407bff;
     border-radius: 10px 0 0 10px;
     text-transform: uppercase;
-   
 }
 
 .btn-icon-content {
@@ -14,4 +13,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
 }
+
+.product-datails-goback {
+    display: flex;
+    align-items: center;
+    
+}
+
+.icon-goback {
+    color: #407BFF;
+    transform: rotate(-180deg);
+    margin-right: 30px;
+ }
+
+ .text-goback {
+     font-size: 24px;
+     line-height: 33px;
+     letter-spacing: -0.015em;
+     color: #263238;
+     text-transform: uppercase;
+ }
