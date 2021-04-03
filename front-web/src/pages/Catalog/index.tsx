@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ProductResponse } from '../../core/types/Product';
-import { makeRequest } from '../../core/utils/request';
+import { ProductResponse } from 'core/types/Product';
+import { makeRequest } from 'core/utils/request';
 import ProductCard from './components/ProductCard';
-import ProductCardLoader from './components/ProductCardLoader';
+import ProductCardLoader from './components/Loaders/ProductCardLoader';
 import './styles.scss';
 
 const Catalog = () => {
     // quando o componente iniciar o componente deve buscar a lista
     // quando a lista de produtos estiver disponivel,
     const [productResponse, setProductResponse] = useState<ProductResponse>();
-    const [isLoading, setisLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // popular um estado no componente, e listar os produtos dinamicamente
     useEffect(() => {
@@ -20,17 +20,14 @@ const Catalog = () => {
             linesPerPage: 5
         };
 
-        setisLoading(true);
+        setIsLoading(true);
         makeRequest({ url: '/produtcs/', params })
             .then(response => setProductResponse(response.data))
             .finally(() => {
-                setisLoading(false);
+                setIsLoading(false);
             });
 
     }, []);
-
-
-
 
     return (
         <div className="catalog-container ">
@@ -40,7 +37,7 @@ const Catalog = () => {
 
             <div className="catalog-products">
 
-                { isLoading ? <ProductCardLoader /> : (
+                { isLoading ? <ProductCardLoader listPerPage={5} /> : (
                     productResponse?.content.map(product => (
                         <Link to={`/products/${product.id}`} key={product.id} >
                             <ProductCard product={product} />

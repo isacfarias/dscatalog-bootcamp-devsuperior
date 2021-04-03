@@ -1,8 +1,12 @@
 import React from "react"
 import ContentLoader from "react-content-loader"
+import { generatorList } from "../../../../core/utils/list"
 
-const ProductCardLoader = () => {
-  const loadItens = [0, 1, 2];
+type Props = {
+  listPerPage: number;
+}
+const ProductCardLoader = ({listPerPage}: Props ) => {
+  const loadItens = generatorList(5);
   return (
     <>
       {

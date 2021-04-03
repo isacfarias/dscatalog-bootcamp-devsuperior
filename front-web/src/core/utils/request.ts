@@ -1,5 +1,5 @@
 import axios, { Method } from 'axios';
-import { url } from 'node:inspector';
+
 
 type ResquestParams = {
     method?: Method;
