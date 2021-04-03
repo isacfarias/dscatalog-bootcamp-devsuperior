@@ -32,7 +32,7 @@ const ProductDetails = () => {
                             Computador Desktop - Intel Core i7
                         </h1>
 
-                        <ProductPrice price="3.779,00" />
+                        <ProductPrice price={3779} />
                         
                     </div>
 
