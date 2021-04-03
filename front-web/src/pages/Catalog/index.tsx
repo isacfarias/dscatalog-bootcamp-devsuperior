@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ProductResponse } from '../../core/types/Products';
+import { ProductResponse } from '../../core/types/Product';
 import { makeRequest } from '../../core/utils/request';
 import ProductCard from './components/ProductCard';
 import './styles.scss';
@@ -35,7 +35,7 @@ const Catalog = () => {
             <div className="catalog-products">
                 {
                     productResponse?.content.map(product => (
-                        <Link to="/products/1" key={product.id} ><ProductCard product={product} /></Link>
+                        <Link to={`/products/${product.id}`} key={product.id} ><ProductCard product={product} /></Link>
                     ))
                 }
             </div>
