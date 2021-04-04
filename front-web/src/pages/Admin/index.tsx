@@ -1,6 +1,10 @@
 import React from 'react';
 import { Route, Switch } from 'react-router';
+import Auth from './components/Auth';
+import Categories from './components/Categories';
 import Navbar from './components/Navbar';
+import Products from './components/Products';
+import Users from './components/Users';
 import './styles.scss';
 
 const Admin = () => (
@@ -11,19 +15,19 @@ const Admin = () => (
             <Switch>
 
                 <Route path="/admin/products">
-                    <h1>Produtos</h1>
+                    <Products />
                 </Route>
 
                 <Route path="/admin/categories">
-                    <h1>Categorias</h1>
+                    <Categories />
                 </Route>
 
                 <Route path="/admin/users">
-                    <h1>Users</h1>
+                    <Users />
                 </Route>
 
                 <Route path="/auth">
-                    <h1>Auth</h1>
+                    <Auth />
                 </Route>
 
             </Switch>
