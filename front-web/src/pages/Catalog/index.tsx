@@ -5,19 +5,22 @@ import { makeRequest } from 'core/utils/request';
 import ProductCard from './components/ProductCard';
 import ProductCardLoader from './components/Loaders/ProductCardLoader';
 import './styles.scss';
+import Pagination from 'core/components/Pagination';
 
 const Catalog = () => {
-    // quando o componente iniciar o componente deve buscar a lista
-    // quando a lista de produtos estiver disponivel,
+
     const [productResponse, setProductResponse] = useState<ProductResponse>();
     const [isLoading, setIsLoading] = useState(false);
+    const [activePage, setActivePage] = useState(0);
+    const [linesPerPage, setLinesPerPage] = useState(12);
 
-    // popular um estado no componente, e listar os produtos dinamicamente
+
+
     useEffect(() => {
 
         const params = {
-            page: 0,
-            linesPerPage: 5
+            page: activePage,
+            linesPerPage: linesPerPage
         };
 
         setIsLoading(true);
@@ -27,7 +30,7 @@ const Catalog = () => {
                 setIsLoading(false);
             });
 
-    }, []);
+    }, [activePage, linesPerPage]);
 
     return (
         <div className="catalog-container ">
@@ -37,7 +40,7 @@ const Catalog = () => {
 
             <div className="catalog-products">
 
-                { isLoading ? <ProductCardLoader listPerPage={5} /> : (
+                {isLoading ? <ProductCardLoader listPerPage={linesPerPage} /> : (
                     productResponse?.content.map(product => (
                         <Link to={`/products/${product.id}`} key={product.id} >
                             <ProductCard product={product} />
@@ -45,6 +48,13 @@ const Catalog = () => {
                     ))
                 )}
             </div>
+
+            { productResponse && (
+                <Pagination 
+                    totalPages={productResponse.totalPages}
+                    activePage={activePage}
+                    onChange={page => setActivePage(page)} />
+            )}
 
         </div>
     );

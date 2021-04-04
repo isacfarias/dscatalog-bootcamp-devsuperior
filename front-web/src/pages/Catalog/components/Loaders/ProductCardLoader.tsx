@@ -6,7 +6,7 @@ type Props = {
   listPerPage: number;
 }
 const ProductCardLoader = ({listPerPage}: Props ) => {
-  const loadItens = generatorList(5);
+  const loadItens = generatorList(listPerPage);
   return (
     <>
       {
