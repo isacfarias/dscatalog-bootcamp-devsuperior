@@ -8,7 +8,7 @@ const Categories = () => {
     return (
         <div>
             <Switch>
-                <Route path="/admin/categories">
+                <Route path="/admin/categories" exact>
                     <h1>Categories list</h1>
                 </Route>
 

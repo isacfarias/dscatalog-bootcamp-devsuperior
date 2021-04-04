@@ -8,7 +8,7 @@ const Products = () => {
     return (
         <div>
             <Switch>
-                <Route path="/admin/products">
+                <Route path="/admin/products" exact>
                     <h1>Produtos list</h1>
                 </Route>
 
