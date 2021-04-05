@@ -1,5 +1,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router';
+import Form from './Form';
+import List from './List';
 import './styles.scss';
 
 
@@ -9,11 +11,11 @@ const Products = () => {
         <div>
             <Switch>
                 <Route path="/admin/products" exact>
-                    <h1>Produtos list</h1>
+                    <List />
                 </Route>
 
                 <Route path="/admin/products/create">
-                    <h1>Create product</h1>
+                    <Form />
                 </Route>
 
                 <Route path="/admin/products/:productId">
