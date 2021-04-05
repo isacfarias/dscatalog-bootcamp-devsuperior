@@ -1,3 +1,5 @@
+import { makeRequest } from 'core/utils/request';
+import { url } from 'node:inspector';
 import React, { useState } from 'react';
 import BaseForm from '../../BaseForm';
 import './styles.scss';
@@ -27,8 +29,13 @@ const Form = () => {
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log(formData);
-      
+        const payload = {
+            ...formData,
+            imgUrl: 'https://fujiokadistribuidor.vteximg.com.br/arquivos/ids/178128',
+            categories: [{ id: formData.category}]
+        }
+        
+        makeRequest({ url:'/produtcs', method:'POST', data: payload });      
     }
 
     return (
@@ -48,9 +55,9 @@ const Form = () => {
                            className="form-control mb-5" 
                            onChange={handleOnChange}
                            name="category">
-                            <option value="livro">Livros</option>
-                            <option value="eletronicos">Eletronicos</option>
-                            <option value="computadores">Computadores</option>
+                            <option value="1">Livros</option>
+                            <option value="2">Eletronicos</option>
+                            <option value="3">Computadores</option>
                         </select>
 
                          <input type="text"
