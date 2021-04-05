@@ -8,23 +8,25 @@ type FormState = {
     name: string;
     category: string;
     price: string;
+    description: string;
 }
 
+type FormEvent = React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
 
 const Form = () => {
 
     const [formData, setFormData] = useState<FormState>({
         name:  '',
         category: '',
-        price: ''
+        price: '',
+        description:''
     });
 
-    const handleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleOnChange = (event: FormEvent ) => {
         const name = event.target.name;
         const value = event.target.value; 
         setFormData(data => ({ ...data, [name]: value}));
         console.log({name, value});
-
     }
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -35,7 +37,10 @@ const Form = () => {
             categories: [{ id: formData.category}]
         }
         
-        makeRequest({ url:'/produtcs', method:'POST', data: payload });      
+        makeRequest({ url:'/produtcs', method:'POST', data: payload })
+        .then(() => {
+            setFormData({name:'', category:'', price:'', description:''});
+        });      
     }
 
     return (
@@ -67,7 +72,16 @@ const Form = () => {
                             value={formData.price}
                         />
                     </div>
-                    <div className="col-6"></div>
+                    <div className="col-6">
+
+                        <textarea className="form-control  mb-5"
+                                  name="description"
+                                  cols={30}
+                                  rows={10}
+                                  onChange={handleOnChange}
+                                  value={formData.description}
+                                  />
+                    </div>
                 </div>
 
             </BaseForm>
