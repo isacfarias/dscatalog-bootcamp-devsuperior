@@ -1,7 +1,5 @@
 package com.devsuperior.dscatalog.services;
 
-import java.util.Iterator;
-
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +7,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devsuperior.dscatalog.dto.RoleDTO;
 import com.devsuperior.dscatalog.dto.UserDTO;
-import com.devsuperior.dscatalog.entities.Category;
+import com.devsuperior.dscatalog.dto.UserInsertDTO;
 import com.devsuperior.dscatalog.entities.Role;
 import com.devsuperior.dscatalog.entities.User;
 import com.devsuperior.dscatalog.repositoy.RoleRepository;
@@ -24,6 +23,9 @@ import com.devsuperior.dscatalog.services.exception.ResourceNotFoundException;
 
 @Service
 public class UserService {
+	
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder ;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -43,9 +45,10 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserDTO save(UserDTO dto) {
+	public UserDTO save(UserInsertDTO dto) {
 		User user = new User();
 		copyDtoToEntity(dto, user);
+		user.setPassword(passwordEncoder.encode(dto.getPassword()));
 		return new UserDTO(userRepository.save(user));
 	}
 
