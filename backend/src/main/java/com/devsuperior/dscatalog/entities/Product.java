@@ -16,8 +16,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
-import com.devsuperior.dscatalog.dto.ProductDTO;
-
 @Entity
 @Table(name = "tb_product")
 public class Product implements Serializable {
