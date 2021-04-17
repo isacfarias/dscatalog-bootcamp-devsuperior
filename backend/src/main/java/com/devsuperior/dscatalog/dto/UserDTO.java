@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 
 import com.devsuperior.dscatalog.entities.User;
 
+
 public class UserDTO implements Serializable {
 		
 	/**
