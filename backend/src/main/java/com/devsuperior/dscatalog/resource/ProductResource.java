@@ -36,11 +36,16 @@ public class ProductResource {
 	public ResponseEntity<Page<ProductDTO>> findAll(
 			@RequestParam(value = "page", defaultValue = "0") Integer page,
 			@RequestParam(value = "categoryId", defaultValue = "0") Long categoryId,
+			@RequestParam(value = "name", defaultValue = "") String name,
 			@RequestParam(value = "linesPerPage", defaultValue = "12") Integer linesPerPage,
 			@RequestParam(value = "orderBy", defaultValue = "name") String orderBy,
 			@RequestParam(value = "direction", defaultValue = "DESC") String direction) {
+		
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
-		Page<ProductDTO> productss = service.findAllPaged(categoryId, pageRequest);
+		
+		Page<ProductDTO> productss = service.findAllPaged(categoryId,
+				                                          name,
+				                                          pageRequest);
 		return ResponseEntity.ok(productss);
 	}
 
