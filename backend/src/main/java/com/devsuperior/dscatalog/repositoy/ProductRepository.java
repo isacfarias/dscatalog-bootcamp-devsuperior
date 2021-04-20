@@ -24,5 +24,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	)
 	Page<Product> find(List<Category> categories, String name, Pageable pageable);
 	
+	@Query("SELECT DISTINCT prod "+
+			"         FROM Product prod "+
+			"   JOIN FETCH prod.categories cats "+
+			"        WHERE  prod IN :products ")
+	List<Product> findProductsWithCategories(List<Product> products);
 
 }
