@@ -11,6 +11,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.devsuperior.dscatalog.services.exception.DataBaseException;
 import com.devsuperior.dscatalog.services.exception.ResourceNotFoundException;
 
@@ -59,6 +61,42 @@ public class ResourceExceptionHandler {
 				                                  request,
 				                                  status,
 				                                  "Database exception");
+		
+		return ResponseEntity.status(status).body(error);
+	}
+	
+	@ExceptionHandler(AmazonServiceException.class)
+	public ResponseEntity<StandardError> awsServiceException(AmazonServiceException e, HttpServletRequest request) {
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		
+		StandardError error = resultStandardError(e,
+                                                  request,
+                                                  status,
+                                                  "AWS Service Exception");
+		
+		return ResponseEntity.status(status).body(error);
+	}
+
+	@ExceptionHandler(AmazonClientException.class)
+	public ResponseEntity<StandardError> awsClientException(AmazonClientException e, HttpServletRequest request) {
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		
+		StandardError error = resultStandardError(e,
+                                                  request,
+                                                  status,
+                                                  "AWS Client Exception");
+		
+		return ResponseEntity.status(status).body(error);
+	}
+
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<StandardError> illegalArgumentException(IllegalArgumentException e, HttpServletRequest request) {
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		
+		StandardError error = resultStandardError(e,
+                                                  request,
+                                                  status,
+                                                  "Illegal Argument");
 		
 		return ResponseEntity.status(status).body(error);
 	}
