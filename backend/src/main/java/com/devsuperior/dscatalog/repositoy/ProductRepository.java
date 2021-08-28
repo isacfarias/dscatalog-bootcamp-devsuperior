@@ -20,7 +20,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	"        WHERE  "+
 	"              (COALESCE(:categories) IS NULL OR cats IN :categories) "+
 	"        AND    "+
-	"              (:name IS NULL OR LOWER(prod.name) LIKE LOWER(CONCAT('%',:name,'%')) ) "
+	"              (LOWER(prod.name) LIKE LOWER(CONCAT('%',:name,'%')) ) "
 	)
 	Page<Product> find(List<Category> categories, String name, Pageable pageable);
 	
