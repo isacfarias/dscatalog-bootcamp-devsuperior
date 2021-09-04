@@ -1,6 +1,5 @@
 package com.devsuperior.dscatalog.resources;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,14 +11,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,8 +36,11 @@ import org.springframework.util.MultiValueMap;
 
 import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.factory.ProductFactory;
+import com.devsuperior.dscatalog.resource.ProductResource;
 import com.devsuperior.dscatalog.services.ProductService;
+import com.devsuperior.dscatalog.services.exception.DataBaseException;
 import com.devsuperior.dscatalog.services.exception.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -45,6 +48,9 @@ public class ProductResourceTests {
 
 	@Autowired
 	private MockMvc mockMvc;
+	
+	@Autowired
+	private ObjectMapper mapper;
 
 	@MockBean
 	private ProductService service;
@@ -57,8 +63,10 @@ public class ProductResourceTests {
 
 	private Long existingId;
 	private Long nonExistingId;
+	private Long dependenteId;
 	private ProductDTO newProductDTO;
 	private ProductDTO existingProductDTO;
+	private PageImpl<ProductDTO> page;
 
 	private String username;
 	private String password;
@@ -67,13 +75,25 @@ public class ProductResourceTests {
 	void setUp() {
 		existingId = 1L;
 		nonExistingId = 2L;
+		dependenteId = 3L;
 		username = "alex@gmail.com";
 		password = "123456";
 		newProductDTO = ProductFactory.createProductDTO(null);
 		existingProductDTO = ProductFactory.createProductDTO(existingId);
+		page = new PageImpl<>(List.of(existingProductDTO));
 
 		when(service.findById(existingId)).thenReturn(existingProductDTO);
 		when(service.findById(nonExistingId)).thenThrow(ResourceNotFoundException.class);
+		when(service.findAllPaged(any(), anyString(), any())).thenReturn(page);
+		
+		when(service.save(any())).thenReturn(existingProductDTO);
+		
+		when(service.update(eq(existingId), any())).thenReturn(existingProductDTO);
+		when(service.update(eq(nonExistingId), any())).thenThrow(ResourceNotFoundException.class);
+		
+		doNothing().when(service).delete(existingId);
+		doThrow(DataBaseException.class).when(service).delete(dependenteId);
+		doThrow(ResourceNotFoundException.class).when(service).delete(nonExistingId);
 	}
 
 	@Test
@@ -82,7 +102,9 @@ public class ProductResourceTests {
 		this.mockMvc.perform(get("/produtcs/{id}", existingId)
 				.header("Authorization", token)
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
+				.andExpect(status().isOk())
+			    .andExpect(jsonPath("$.id").exists())
+			    .andExpect(jsonPath("$.id").value(existingId));
 	}
 
 	@Test
@@ -92,6 +114,109 @@ public class ProductResourceTests {
 				.header("Authorization", token)
 				.accept(MediaType.APPLICATION_JSON))
 		        .andExpect(status().isNotFound());
+	}
+
+	@Test
+	void updateShouldReturnNotFoundWhenIdDosNotExist() throws Exception {
+		newProductDTO.setDate(Instant.now());
+		var jsonBody = mapper.writeValueAsString(newProductDTO);
+		String token = "Bearer "+ obtainAccessToken(username, password);
+		ResultActions result = mockMvc.perform(put("/produtcs/{id}", nonExistingId)
+				.header("Authorization", token)
+				.content(jsonBody)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON));
+		
+		        result.andExpect(status().isNotFound());
+	}
+	
+	@Test
+	void updateShouldReturnProductDTOWhenIdExist() throws Exception {
+		newProductDTO.setDate(Instant.now());
+		var jsonBody = mapper.writeValueAsString(newProductDTO);
+		String token = "Bearer "+ obtainAccessToken(username, password);
+		
+		var expectedName = newProductDTO.getName();
+		var expectedPrice = newProductDTO.getPrice();
+		
+		ResultActions result = mockMvc.perform(put("/produtcs/{id}", existingId)
+				.header("Authorization", token)
+				.content(jsonBody)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON));
+		
+		        result.andExpect(status().isOk())
+		        .andExpect(jsonPath("$.id").exists())
+		        .andExpect(jsonPath("$.id").value(existingId))
+		        .andExpect(jsonPath("$.name").value(expectedName))
+		        .andExpect(jsonPath("$.price").value(expectedPrice));
+	}
+	
+	@Test
+	void saveShouldReturnUnProcessableEntityWhenPriceDoesNegative() throws Exception {
+		newProductDTO.setDate(Instant.now());
+		newProductDTO.setPrice(newProductDTO.getPrice()*-1);
+		var jsonBody = mapper.writeValueAsString(newProductDTO);
+		String token = "Bearer "+ obtainAccessToken(username, password);
+		ResultActions result = mockMvc.perform(post("/produtcs")
+				.header("Authorization", token)
+				.content(jsonBody)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON));
+		        result.andExpect(status().isUnprocessableEntity());
+	}
+	
+	@Test
+	void saveShouldReturnProductDTOWhenSucessful() throws Exception {
+		newProductDTO.setDate(Instant.now());
+		var jsonBody = mapper.writeValueAsString(newProductDTO);
+		String token = "Bearer "+ obtainAccessToken(username, password);
+		ResultActions result = mockMvc.perform(post("/produtcs")
+				.header("Authorization", token)
+				.content(jsonBody)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON));
+		        result.andExpect(status().isCreated());
+	}
+	
+	@Test
+	void deleteShouldReturnNoContentWhenIdExist() throws Exception {
+		newProductDTO.setDate(Instant.now());
+		var jsonBody = mapper.writeValueAsString(newProductDTO);
+		String token = "Bearer "+ obtainAccessToken(username, password);
+		
+		ResultActions result = mockMvc.perform(delete("/produtcs/{id}", existingId)
+				.header("Authorization", token)
+				.content(jsonBody)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON));
+		
+		        result.andExpect(status().isNoContent());
+	}
+	
+	@Test
+	void deleteShouldReturnNotFoundWhenIdDoesNotExist() throws Exception {
+		newProductDTO.setDate(Instant.now());
+		var jsonBody = mapper.writeValueAsString(newProductDTO);
+		String token = "Bearer "+ obtainAccessToken(username, password);
+		
+		ResultActions result = mockMvc.perform(delete("/produtcs/{id}", nonExistingId)
+				.header("Authorization", token)
+				.content(jsonBody)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON));
+		
+		        result.andExpect(status().isNotFound());
+	}
+	
+	@Test
+	void findAllShouldReturnPage() throws Exception {
+		String token = "Bearer "+ obtainAccessToken(username, password);
+		this.mockMvc.perform(get("/produtcs")
+				.header("Authorization", token)
+				.accept(MediaType.APPLICATION_JSON))
+		        .andExpect(status().isOk())
+		        .andExpect(jsonPath("$.content").exists());
 	}
 
 	private String obtainAccessToken(String username, String password) throws Exception {
