@@ -18,6 +18,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
 import com.devsuperior.dscatalog.factory.CategoryFactory;
 import com.devsuperior.dscatalog.factory.ProductFactory;
@@ -101,7 +102,7 @@ class ProductRepositoryTest {
 	}
 	
 	@Test
-	void findShouldReturnAllProductsWhenCategory() {
+	void findShouldReturnOnlySelectedCategoryWhenCategoryInformed() {
 		final var name = "";
 		final var category = List.of(CategoryFactory.createCategoryComputers());
 		
@@ -120,6 +121,16 @@ class ProductRepositoryTest {
 		
 		assertFalse(result.isEmpty());
 		assertEquals(countComputadoresCategory, result.getTotalElements());
+	}
+	
+	@Test
+	void findShouldReturnAllProductsWhenCategoryisEmpty() {
+		final var name = "";
+		List<Category> category = null;
+		Page<Product> result = reposity.find(category, name, pageRequest);
+		
+		assertFalse(result.isEmpty());
+		assertEquals(countTotalProducts, result.getTotalElements());
 	}
 	
 

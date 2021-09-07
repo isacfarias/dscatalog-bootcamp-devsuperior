@@ -153,7 +153,7 @@ public class ProductResourceTests {
 	}
 	
 	@Test
-	void saveShouldReturnUnProcessableEntityWhenPriceDoesNegative() throws Exception {
+	void insertShouldReturnUnProcessableEntityWhenNegativePrice() throws Exception {
 		newProductDTO.setDate(Instant.now());
 		newProductDTO.setPrice(newProductDTO.getPrice()*-1);
 		var jsonBody = mapper.writeValueAsString(newProductDTO);
@@ -167,16 +167,24 @@ public class ProductResourceTests {
 	}
 	
 	@Test
-	void saveShouldReturnProductDTOWhenSucessful() throws Exception {
+	void insertShouldReturnCreateProductDTOWhenValidData() throws Exception {
 		newProductDTO.setDate(Instant.now());
 		var jsonBody = mapper.writeValueAsString(newProductDTO);
 		String token = "Bearer "+ obtainAccessToken(username, password);
+		
+		var expectedName = newProductDTO.getName();
+		var expectedPrice = newProductDTO.getPrice();
+		
 		ResultActions result = mockMvc.perform(post("/produtcs")
 				.header("Authorization", token)
 				.content(jsonBody)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON));
-		        result.andExpect(status().isCreated());
+		        result.andExpect(status().isCreated())
+		        .andExpect(jsonPath("$.id").exists())
+		        .andExpect(jsonPath("$.id").value(existingId))
+		        .andExpect(jsonPath("$.name").value(expectedName))
+		        .andExpect(jsonPath("$.price").value(expectedPrice));
 	}
 	
 	@Test

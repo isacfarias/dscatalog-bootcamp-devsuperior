@@ -2,16 +2,16 @@ package com.devsuperior.dscatalog.services;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,19 +19,20 @@ import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.devsuperior.dscatalog.dto.ProductDTO;
 import com.devsuperior.dscatalog.entities.Product;
 import com.devsuperior.dscatalog.factory.ProductFactory;
+import com.devsuperior.dscatalog.repositoy.CategoryRepository;
 import com.devsuperior.dscatalog.repositoy.ProductRepository;
 import com.devsuperior.dscatalog.services.exception.DataBaseException;
 import com.devsuperior.dscatalog.services.exception.ResourceNotFoundException;
@@ -46,24 +47,32 @@ public class ProductServiceTest {
 	@Mock
 	private ProductRepository repository;
 	
+	@Mock
+	private CategoryRepository categoryRepository;
+	
 	private Long productId;
 	private Long noExistproductId;
 	private Long dependenteProductId;
 	private PageImpl<Product> page;
+	private Product product;
+	private Product productNoExist;
 	
 	@BeforeEach
 	void setUp() {
 		productId = 2L;
 		noExistproductId = 1000L;
 		dependenteProductId = 4L;
-		final var product = ProductFactory.createProduct(productId);
-		final var productNoExist = ProductFactory.createProduct(noExistproductId);
+		product = ProductFactory.createProduct(productId);
+		productNoExist = ProductFactory.createProduct(noExistproductId);
 		page = new PageImpl<>(List.of(product));
 		
-		when(repository.save(ProductFactory.createProduct())).thenReturn(product);
+		when(repository.save(any())).thenReturn(product);
 		when(repository.find(any(), anyString(), any())).thenReturn(page);
 		when(repository.findById(productId)).thenReturn(Optional.of(product));
 		when(repository.findById(noExistproductId)).thenReturn(Optional.empty());
+		
+		when(repository.getOne(productId)).thenReturn(product);
+		when(repository.getOne(noExistproductId)).thenThrow(EntityNotFoundException.class);
 		
 		doNothing().when(repository).deleteById(productId);
 		doThrow(EmptyResultDataAccessException.class).when(repository).deleteById(noExistproductId);
@@ -90,12 +99,17 @@ public class ProductServiceTest {
 	}
 	
 	
-	@Test @Disabled
-	void findShouldReturnListProductsWhenSucess() {
+	@Test
+	void findAllPagedShouldReturnPage() {
+		var categoryId = 0L;
+		var name = "";
+		var pageResquest = PageRequest.of(0, 10);
 		
-		var page = service.findAllPaged(null, "PC gamer", null);
+		var result = service.findAllPaged(categoryId, name, pageResquest);
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
 		
-		verify(repository, times(1)).find(any(), anyString(), any());
+		verify(repository, times(1)).find(null, name, pageResquest);
 	}
 	
 	@Test
@@ -105,28 +119,29 @@ public class ProductServiceTest {
 		
 		assertNotNull(product);
 		assertEquals(productId, product.getId());
+		verify(repository, times(1)).findById(productId);
 	}
 	
 	@Test
 	void findbyIdShouldThrowResourceNotFoundExceptionWhenIdNoExist() {
 		assertThrows(ResourceNotFoundException.class, () -> service.findById(noExistproductId));
-		verify(repository, times(1)).findById(noExistproductId);
 	}
 	
-	@Test @Disabled
+	@Test 
 	void updateShouldReturnProductsWhenIdExist() {
-		var product = service.update(productId, ProductFactory.createProductDTO(productId));
-		verify(repository, times(1)).save(any());
+		var dto = ProductFactory.createProductDTO();
+		var product = service.update(productId, dto);
 		
 		assertNotNull(product);
 		assertEquals(productId, product.getId());
+		
+		verify(repository, times(1)).save(any());
 	}
 	
-	@Test @Disabled
+	@Test 
 	void updateShouldThrowResourceNotFoundExceptionWhenIdNoExist() {
-		var productNotupdated = ProductFactory.createProductDTO(noExistproductId);
+		var productNotupdated = new ProductDTO();
 		assertThrows(ResourceNotFoundException.class, () -> service.update(noExistproductId, productNotupdated));
-		verify(repository, times(1)).save(any());
 	}
 	
 }
